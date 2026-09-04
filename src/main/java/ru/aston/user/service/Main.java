@@ -1,5 +1,6 @@
 package ru.aston.user.service;
 
+import ru.aston.user.service.config.HibernateUtil;
 import ru.aston.user.service.entity.User;
 
 import java.time.LocalDateTime;
@@ -14,5 +15,9 @@ public class Main {
         user.setCreatedAt(LocalDateTime.now());
 
         System.out.println(user);
+
+        if (HibernateUtil.getSessionFactory() != null) {
+            System.out.println("Config Hibernate");
+        }
     }
 }
