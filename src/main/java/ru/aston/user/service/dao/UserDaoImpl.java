@@ -83,8 +83,11 @@ public class UserDaoImpl implements UserDao {
     @Override
     public boolean existByEmail(String email) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            User user = session.get(User.class, email);
-            return user != null;
+            Query<Long> query = session.createQuery(
+                    "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
+            query.setParameter("email", email);
+            Long count = query.uniqueResult();
+            return count != null && count > 0;
         } catch (Exception e) {
             throw new RuntimeException("Failed to check email existence", e);
         }
