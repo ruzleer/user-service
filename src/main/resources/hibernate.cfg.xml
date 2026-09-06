@@ -15,7 +15,7 @@
         </property>
 
         <property name="hibernate.connection.password">
-            12345678
+            YOUR_DB_PASSWORD
         </property>
 
         <property name="hibernate.dialect">
