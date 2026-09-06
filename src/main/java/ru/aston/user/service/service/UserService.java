@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import ru.aston.user.service.dao.UserDao;
 import ru.aston.user.service.dao.UserDaoImpl;
 import ru.aston.user.service.entity.User;
+import ru.aston.user.service.exceptions.EmailCheckException;
+import ru.aston.user.service.exceptions.UserNotFoundException;
+import ru.aston.user.service.exceptions.ValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +28,7 @@ public class UserService {
         checkEnteredData(name, email, age);
         if (userDao.existByEmail(email)) {
             logger.warn("Попытка создания пользователя с уже существующим email: {}", email);
-            throw new IllegalStateException("Email already exists: " + email);
+            throw new EmailCheckException("Email already exists: " + email);
         }
         logger.debug("Email {} свободен, создание пользователя разрешено", email);
         logger.debug("Создание объекта User");
@@ -42,7 +45,7 @@ public class UserService {
         logger.info("Запрос на удаление пользователя: id={}", id);
         if (id == null || id <= 0) {
             logger.warn("Попытка не правильного ввода id");
-            throw new IllegalArgumentException("Invalid user ID");
+            throw new ValidationException("Invalid user ID");
         }
         userDao.delete(id);
     }
@@ -52,7 +55,7 @@ public class UserService {
         Optional<User> existingUserOpt = userDao.findById(id);
         if (existingUserOpt.isEmpty()) {
             logger.warn("Пользователь с id={} не найден", id);
-            throw new IllegalStateException("User not found with ID: " + id);
+            throw new UserNotFoundException("User not found with ID: " + id);
         }
 
         User existingUser = existingUserOpt.get();
@@ -60,7 +63,7 @@ public class UserService {
         checkEnteredData(name, email, age);
         if (userDao.existByEmail(email) && !existingUser.getEmail().equals(email)) {
             logger.warn("Попытка обновление уже существующим email: {}", email);
-            throw new IllegalStateException("Email already exists: " + email);
+            throw new EmailCheckException("Email already exists: " + email);
         }
 
         existingUser.setName(name.trim());
@@ -75,7 +78,7 @@ public class UserService {
         logger.info("Запрос на поиск пользователя: id={}", id);
         if (id == null || id <= 0) {
             logger.warn("Попытка не правильного ввода id");
-            throw new IllegalArgumentException("Invalid user ID");
+            throw new ValidationException("Invalid user ID");
         }
         return userDao.findById(id);
     }
@@ -89,15 +92,15 @@ public class UserService {
         logger.debug("Начало валидации данных пользователя");
         if (name == null || name.trim().isEmpty()) {
             logger.warn("Попытка ввести пустую строку вместо имени");
-            throw new IllegalArgumentException("Name cannot be empty");
+            throw new ValidationException("Name cannot be empty");
         }
         if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             logger.warn("Попытка ввести не правильный формат почты");
-            throw new IllegalArgumentException("Invalid email format");
+            throw new ValidationException("Invalid email format");
         }
         if (age <= 0) {
             logger.warn("Попытка ввести отрицательный возраст");
-            throw new IllegalArgumentException("Age must be positive");
+            throw new ValidationException("Age must be positive");
         }
         logger.debug("Валидация данных успешно пройдена");
     }
