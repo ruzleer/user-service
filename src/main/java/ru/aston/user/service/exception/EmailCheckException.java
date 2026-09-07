@@ -1,4 +1,4 @@
-package ru.aston.user.service.exceptions;
+package ru.aston.user.service.exception;
 
 public class EmailCheckException extends RuntimeException {
     public EmailCheckException(String message) {

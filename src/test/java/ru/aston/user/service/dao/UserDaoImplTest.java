@@ -1,19 +1,15 @@
 package ru.aston.user.service.dao;
 
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import org.hibernate.Transaction;
 import org.junit.jupiter.api.Assertions;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.aston.user.service.entity.User;
-import ru.aston.user.service.exceptions.UserNotSaveException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

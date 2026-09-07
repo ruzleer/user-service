@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import ru.aston.user.service.dao.UserDao;
 import ru.aston.user.service.dao.UserDaoImpl;
 import ru.aston.user.service.entity.User;
-import ru.aston.user.service.exceptions.EmailCheckException;
-import ru.aston.user.service.exceptions.UserNotFoundException;
-import ru.aston.user.service.exceptions.ValidationException;
+import ru.aston.user.service.exception.EmailCheckException;
+import ru.aston.user.service.exception.UserNotFoundException;
+import ru.aston.user.service.exception.ValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,7 +94,7 @@ public class UserService {
             logger.warn("Попытка ввести пустую строку вместо имени");
             throw new ValidationException("Name cannot be empty");
         }
-        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             logger.warn("Попытка ввести не правильный формат почты");
             throw new ValidationException("Invalid email format");
         }

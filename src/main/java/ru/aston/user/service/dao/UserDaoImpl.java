@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.aston.user.service.config.HibernateUtil;
 import ru.aston.user.service.entity.User;
-import ru.aston.user.service.exceptions.*;
+import ru.aston.user.service.exception.*;
 
 import java.util.List;
 import java.util.Optional;

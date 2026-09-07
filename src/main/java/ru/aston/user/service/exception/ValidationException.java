@@ -1,4 +1,4 @@
-package ru.aston.user.service.exceptions;
+package ru.aston.user.service.exception;
 
 public class ValidationException extends RuntimeException {
     private final String field;
