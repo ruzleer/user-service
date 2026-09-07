@@ -1,4 +1,4 @@
-package ru.aston.user.service.exceptions;
+package ru.aston.user.service.exception;
 
 public class UserNotSaveException extends RuntimeException {
     public UserNotSaveException(String message) {

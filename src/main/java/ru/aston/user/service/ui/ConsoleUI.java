@@ -30,7 +30,7 @@ public class ConsoleUI {
                     case 5 -> deleteUser();
                     case 0 -> {
                         running = false;
-                        System.out.println("Good buy");
+                        System.out.println("Goodbye");
                     }
                     default -> System.out.println("Invalid option. Please try again.");
                 }

@@ -51,14 +51,26 @@ src/
 │    │                   ├── Main.java
 │    │                   ├── config/
 │    │                   │   └── HibernateUtil.java
-│    │                   ├── console/
 │    │                   ├── dao/
+│    │                   │   └── UserDao.java
+│    │                   │   └── UserDaoImpl.java
 │    │                   ├── entity/
 │    │                   │   └── User.java   
-│    │                   └── exception/
+│    │                   ├── exception/
+│    │                   │   ├── EmailCheckException.java
+│    │                   │   ├── UserNotDeletedException.java
+│    │                   │   ├── UserNotFoundException.java
+│    │                   │   ├── UserNotSaveException.java
+│    │                   │   ├── UserNotUpdateException.java
+│    │                   │   └── ValidationException.java
+│    │                   ├── service/
+│    │                   │   └── UserService.java
+│    │                   └── ui/
+│    │                       └── ConsoleUI.java
 │    │
 │    └── resources/
-│        └── hibernate.cfg.xml
+│        ├── hibernate.cfg.xml
+│        └── logback.xml
 ├── pom.xml
 ├── README.md
 └── .gitignore
@@ -82,7 +94,7 @@ src/
 ## Сложности и вопросы
 
 Будут добавляться по мере выполнения проекта.
-1) Как праильно писать тесты на метгоды для проверки взаимодействия с БД? Проблема, что при любом тесте создается новая сущность и дублируется, а удалить ее после тестов не получается.
+1) Как правильно писать тесты на методы для проверки взаимодействия с БД? Проблема, что при любом тесте создается новая сущность и дублируется, а удалить ее после тестов не получается.
  Из-за этого некоторые тесты могут работать некоректно.
-2) Как используются библиотека Mockito и для чего нужны ее анотации?
-3) Как в целом должен проходить процесс тестирвоания?
+2) Как используются библиотека Mockito и для чего нужны ее аннотации?
+3) Как в целом должен проходить процесс тестирования?
