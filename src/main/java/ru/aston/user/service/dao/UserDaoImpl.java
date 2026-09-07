@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.aston.user.service.config.HibernateUtil;
 import ru.aston.user.service.entity.User;
+import ru.aston.user.service.exceptions.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Транзакция не запущена");
             }
             logger.error("Ошибка при сохранении информации о пользователе с id={}", user.getId());
-            throw new RuntimeException("Failed to save user", e);
+            throw new UserNotSaveException("Failed to save user");
         }
     }
 
@@ -54,7 +55,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Транзакция не запущена");
             }
             logger.error("Ошибка при обновлении информации о пользователе с id={}", user.getId());
-            throw new RuntimeException("Failed to update user", e);
+            throw new UserNotUpdateException(user.getId());
         }
     }
 
@@ -80,7 +81,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Транзакция не запущена");
             }
             logger.error("Ошибка при удалении пользователя с id={}", id);
-            throw new RuntimeException("Failed to update user", e);
+            throw new UserNotDeleteException(id);
         }
     }
 
@@ -103,7 +104,7 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (Exception e) {
             logger.info("Ошибка при поиске пользователя по id = {}", id);
-            throw new RuntimeException("Failed to find user", e);
+            throw new UserNotFoundException(id);
         }
     }
 
@@ -133,7 +134,7 @@ public class UserDaoImpl implements UserDao {
             return users;
         } catch (Exception e) {
             logger.error("Ошибка при получении всех пользователей", e);
-            throw new RuntimeException("Failed to find users", e);
+            throw new UserNotFoundException("Failed to find users");
         }
     }
 
@@ -155,7 +156,7 @@ public class UserDaoImpl implements UserDao {
             return exists;
         } catch (Exception e) {
             logger.error("Ошибка при проверке существования email {} ", email);
-            throw new RuntimeException("Failed to check email existence", e);
+            throw new EmailCheckException("Failed to check email existence");
         }
     }
 }
