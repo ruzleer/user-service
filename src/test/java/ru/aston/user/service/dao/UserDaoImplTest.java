@@ -26,7 +26,6 @@ public class UserDaoImplTest {
     private SessionFactory sessionFactory;
 
     User user1 = new User(25, "Alex Ron", "alex@mail.ru", LocalDateTime.now());
-    User user2 = new User(30, "Fedor Ton", "fedor@mail.ru", LocalDateTime.now());
 
     @BeforeEach
     void setUp() {
