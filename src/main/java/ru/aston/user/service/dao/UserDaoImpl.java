@@ -31,7 +31,7 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при сохранении информации о пользователе с id={}", user.getId());
             throw new UserNotSaveException("Failed to save user");
@@ -52,7 +52,7 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при обновлении информации о пользователе с id={}", user.getId());
             throw new UserNotUpdateException(user.getId());
@@ -78,7 +78,7 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при удалении пользователя с id={}", id);
             throw new UserNotDeleteException(id);
