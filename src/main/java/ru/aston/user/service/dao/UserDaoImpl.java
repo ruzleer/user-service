@@ -31,8 +31,10 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User save(User user) {
         Transaction transaction = null;
+        Session session = null;
         logger.debug("Получен пользователь: id = {}, name = {}", user.getId(), user.getName());
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             session.persist(user);
@@ -46,6 +48,10 @@ public class UserDaoImpl implements UserDao {
             }
             logger.error("Ошибка при сохранении информации о пользователе с id={}", user.getId());
             throw new DatabaseOperationException("save", user.getId(), e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 
