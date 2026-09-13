@@ -40,34 +40,34 @@ public class UserDaoUpdateTest extends AbstractPostgresTest {
 
     @Test
     @DisplayName("Пользователь успешно обновляется в БД")
-    void shouldUpdateUserSuccessfully() {
-        User existing = persistUser("Old Name", "old@example.com", 25);
+    void testUpdateUserSuccessfully() {
+        User existing = persistUser("Old Name", "old@mail.ru", 25);
 
         existing.setName("New Name");
-        existing.setEmail("new@example.com");
+        existing.setEmail("new@mail.ru");
         existing.setAge(30);
 
         User updated = userDao.update(existing);
 
         assertThat(updated.getId()).isEqualTo(existing.getId());
         assertThat(updated.getName()).isEqualTo("New Name");
-        assertThat(updated.getEmail()).isEqualTo("new@example.com");
+        assertThat(updated.getEmail()).isEqualTo("new@mail.ru");
         assertThat(updated.getAge()).isEqualTo(30);
 
         try (Session session = sessionFactory.openSession()) {
             User fromDb = session.get(User.class, existing.getId());
             assertThat(fromDb.getName()).isEqualTo("New Name");
-            assertThat(fromDb.getEmail()).isEqualTo("new@example.com");
+            assertThat(fromDb.getEmail()).isEqualTo("new@mail.ru");
         }
     }
 
     @Test
     @DisplayName("Обновление с уже существующей почтой")
-    void shouldFailWhenEmailAlreadyExists() {
+    void testEmailAlreadyExists() {
         persistUser("First", "first@example.com", 20);
         User second = persistUser("Second", "second@example.com", 22);
 
-        second.setEmail("first@example.com"); // дубликат
+        second.setEmail("first@example.com");
 
         assertThatThrownBy(() -> userDao.update(second))
                 .isInstanceOf(DatabaseOperationException.class)
@@ -76,8 +76,8 @@ public class UserDaoUpdateTest extends AbstractPostgresTest {
 
     @Test
     @DisplayName("Обновление с пустым именем")
-    void shouldFailWhenNameIsEmpty() {
-        User user = persistUser("Valid", "valid@example.com", 30);
+    void testNameIsEmpty() {
+        User user = persistUser("Alex", "alex@mail.ru", 30);
         user.setName("");
 
         assertThatThrownBy(() -> userDao.update(user))
@@ -86,8 +86,8 @@ public class UserDaoUpdateTest extends AbstractPostgresTest {
 
     @Test
     @DisplayName("Обновление с пустой почтой")
-    void shouldFailWhenEmailIsEmpty() {
-        User user = persistUser("Valid", "valid@example.com", 30);
+    void testEmailIsEmpty() {
+        User user = persistUser("Alex", "alex@mail.ru", 30);
         user.setEmail("");
 
         assertThatThrownBy(() -> userDao.update(user))
@@ -95,9 +95,9 @@ public class UserDaoUpdateTest extends AbstractPostgresTest {
     }
 
     @Test
-    @DisplayName("Обновление с некорректным возрастом (например, отрицательным) → нарушение CHECK")
-    void shouldFailWhenAgeIsInvalid() {
-        User user = persistUser("Valid", "valid@example.com", 30);
+    @DisplayName("Обновление с некорректным возрастом")
+    void testAgeIsInvalid() {
+        User user = persistUser("Alex", "alex@mail.ru", 30);
         user.setAge(-5);
 
         assertThatThrownBy(() -> userDao.update(user))
@@ -106,8 +106,8 @@ public class UserDaoUpdateTest extends AbstractPostgresTest {
 
     @Test
     @DisplayName("Обновление с неправильным форматом почты")
-    void shouldFailWhenEmailFormatIsInvalid() {
-        User user = persistUser("Valid", "valid@example.com", 30);
+    void testEmailFormatIsInvalid() {
+        User user = persistUser("Alex", "alex@mail.ru", 30);
         user.setEmail("not-an-email");
 
         assertThatThrownBy(() -> userDao.update(user))
