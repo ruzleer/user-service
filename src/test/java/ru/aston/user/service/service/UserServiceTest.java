@@ -1,53 +1,158 @@
 package ru.aston.user.service.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import ru.aston.user.service.dao.UserDao;
+import ru.aston.user.service.entity.User;
 import ru.aston.user.service.exception.ValidationException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    @InjectMocks
+
+    @Mock
+    private UserDao userDao;
+
     private UserService userService;
 
-    @Test
-    void TestValidateName() {
-        String name = "";
-        String email = "alex@mail.ru";
-        int age = 25;
-
-        assertThatThrownBy(() -> userService.createUser(name, email, age))
-                .isInstanceOf(ValidationException.class)
-                .hasMessage("Name cannot be empty");
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        userService = new UserService(userDao);
     }
 
     @Test
-    void TestValidateEmail() {
-        String name = "Alex";
-        String email = "invalid-email";
-        int age = 25;
+    void createUser_shouldCreateUser_whenDataIsValid() {
+        User savedUser = new User();
+        savedUser.setName("Ivan");
+        savedUser.setEmail("ivan@mail.com");
+        savedUser.setAge(25);
 
-        assertThatThrownBy(() -> userService.createUser(name, email, age))
-                .isInstanceOf(ValidationException.class)
-                .hasMessage("Invalid email format");
+        when(userDao.existByEmail("ivan@mail.com"))
+                .thenReturn(false);
+
+        when(userDao.save(any(User.class)))
+                .thenReturn(savedUser);
+
+        User user = userService.createUser(
+                "Ivan",
+                "ivan@mail.com",
+                25
+        );
+
+        assertEquals("Ivan", user.getName());
+        assertEquals("ivan@mail.com", user.getEmail());
     }
 
     @Test
-    void TestValidateAge() {
-        String name = "Alex";
-        String email = "alex@mail.ru";
-        int age = -5;
+    void createUser_shouldThrowException_whenNameIsEmpty() {
+        assertThrows(
+                ValidationException.class,
+                () -> userService.createUser(
+                        "",
+                        "test@test.com",
+                        25
+                )
+        );
 
-        assertThatThrownBy(() -> userService.createUser(name, email, age))
-                .isInstanceOf(ValidationException.class)
-                .hasMessage("Age must be positive");
+        verifyNoInteractions(userDao);
     }
 
+    @Test
+    void createUser_shouldThrowException_whenAgeIsNegative() {
+        assertThrows(
+                ValidationException.class,
+                () -> userService.createUser(
+                        "Alex",
+                        "test@test.com",
+                        -5
+                )
+        );
+
+        verifyNoInteractions(userDao);
+    }
+
+    @Test
+    void createUser_shouldTrimName_whenNameContainsSpaces() {
+        User savedUser = new User();
+        savedUser.setName("Ivan");
+
+        when(userDao.existByEmail("ivan@mail.com"))
+                .thenReturn(false);
+
+        when(userDao.save(any(User.class)))
+                .thenReturn(savedUser);
+
+        User user = userService.createUser(
+                "  Ivan  ",
+                "ivan@mail.com",
+                25
+        );
+
+        assertEquals("Ivan", user.getName());
+    }
+
+    @Test
+    void createUser_shouldThrowException_whenEmailIsEmpty() {
+        assertThrows(
+                ValidationException.class,
+                () -> userService.createUser(
+                        "Ivan",
+                        "",
+                        25
+                )
+        );
+
+        verifyNoInteractions(userDao);
+    }
+
+    @Test
+    void createUser_shouldTrimEmail_whenEmailContainsSpaces() {
+        User savedUser = new User();
+        savedUser.setEmail("ivan@mail.com");
+
+        when(userDao.existByEmail("ivan@mail.com"))
+                .thenReturn(false);
+
+        when(userDao.save(any(User.class)))
+                .thenReturn(savedUser);
+
+        User user = userService.createUser(
+                "Ivan",
+                "  ivan@mail.com  ",
+                25
+        );
+
+        assertEquals("ivan@mail.com", user.getEmail());
+    }
+
+    @Test
+    void createUser_shouldThrowException_whenEmailFormatIsInvalid() {
+        assertThrows(
+                ValidationException.class,
+                () -> userService.createUser(
+                        "Ivan",
+                        "ivanmail.com",
+                        25
+                )
+        );
+
+        verifyNoInteractions(userDao);
+    }
+
+    @Test
+    void findById_shouldThrowException_whenIdIsNegative() {
+        assertThrows(
+                ValidationException.class,
+                () -> userService.findById(-1L)
+        );
+
+        verifyNoInteractions(userDao);
+    }
 }
 
