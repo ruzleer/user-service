@@ -25,6 +25,7 @@ public class User {
         this.createdAt = createdAt;
     }
 
+
     public void setAge(int age) {
         this.age = age;
     }
@@ -59,6 +60,11 @@ public class User {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    @PrePersist
+    public void onCreate(){
+        createdAt = LocalDateTime.now();
     }
 
     @Override
