@@ -1,17 +1,21 @@
 package ru.aston.user.service.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users") // данные хранятся в таблице users
+@Check(constraints = "age > 0 AND length(name) > 0 AND length(email) > 0 "
+             + "AND email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$' ")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int age;
     private String name;
+    @Column(nullable = false, unique = true)
     private String email;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
