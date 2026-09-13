@@ -1,6 +1,7 @@
 package ru.aston.user.service.dao;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -17,11 +18,21 @@ public class UserDaoImpl implements UserDao {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
 
+    private final SessionFactory sessionFactory;
+
+    public UserDaoImpl() {
+        this.sessionFactory = HibernateUtil.getSessionFactory();
+    }
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public User save(User user) {
         Transaction transaction = null;
         logger.debug("Получен пользователь: id = {}, name = {}", user.getId(), user.getName());
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             session.persist(user);
@@ -42,7 +53,7 @@ public class UserDaoImpl implements UserDao {
     public User update(User user) {
         Transaction transaction = null;
         logger.debug("Получен пользователь: id = {}, name = {}", user.getId(), user.getName());
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             User updatedUser = session.merge(user);
@@ -63,7 +74,7 @@ public class UserDaoImpl implements UserDao {
     public void delete(Long id) {
         Transaction transaction = null;
         logger.debug("Получен id = {}", id);
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             User user = session.get(User.class, id);
@@ -87,7 +98,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             User user = session.get(User.class, id);
             if (user != null) {
@@ -110,7 +121,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             Query<User> query = session.createQuery("FROM User ORDER BY id", User.class);
             List<User> users = query.list();
@@ -140,7 +151,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean existByEmail(String email) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта для проверки email: {}", email);
             Query<Long> query = session.createQuery(
                     "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
