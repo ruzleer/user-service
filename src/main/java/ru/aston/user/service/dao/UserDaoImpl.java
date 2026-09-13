@@ -34,7 +34,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при сохранении информации о пользователе с id={}", user.getId());
-            throw new UserNotSaveException("Failed to save user");
+            throw new DatabaseOperationException("save", user.getId(), e);
         }
     }
 
@@ -55,7 +55,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при обновлении информации о пользователе с id={}", user.getId());
-            throw new UserNotUpdateException(user.getId());
+            throw new DatabaseOperationException("update", user.getId(), e);
         }
     }
 
@@ -81,7 +81,7 @@ public class UserDaoImpl implements UserDao {
                 logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при удалении пользователя с id={}", id);
-            throw new UserNotDeleteException(id);
+            throw new DatabaseOperationException("delete", id, e);
         }
     }
 
@@ -104,7 +104,7 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (Exception e) {
             logger.info("Ошибка при поиске пользователя по id = {}", id);
-            throw new UserNotFoundException(id);
+            throw new DatabaseOperationException("find", id, e);
         }
     }
 
@@ -134,7 +134,7 @@ public class UserDaoImpl implements UserDao {
             return users;
         } catch (Exception e) {
             logger.error("Ошибка при получении всех пользователей", e);
-            throw new UserNotFoundException("Failed to find users");
+            throw new DatabaseOperationException("Failed to find users");
         }
     }
 
