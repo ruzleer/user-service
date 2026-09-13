@@ -61,6 +61,11 @@ public class User {
         return createdAt;
     }
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
     @Override
     public String toString() {
         return "User{" +

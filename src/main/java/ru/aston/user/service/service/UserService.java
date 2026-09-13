@@ -36,7 +36,6 @@ public class UserService {
         user.setName(name);
         user.setEmail(email);
         user.setAge(age);
-        user.setCreatedAt(LocalDateTime.now());
         logger.debug("Объект User создан: name={}, email={}, age={}", user.getName(), user.getEmail(), user.getAge());
         return userDao.save(user);
     }
@@ -69,7 +68,6 @@ public class UserService {
         existingUser.setName(name.trim());
         existingUser.setEmail(email.trim());
         existingUser.setAge(age);
-        existingUser.setCreatedAt(LocalDateTime.now());
         logger.debug("Объект User обновлен: name={}, email={}, age={}", existingUser.getName(), existingUser.getEmail(), existingUser.getAge());
         return userDao.update(existingUser);
     }
