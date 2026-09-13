@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import ru.aston.user.service.dao.UserDao;
 import ru.aston.user.service.dao.UserDaoImpl;
 import ru.aston.user.service.entity.User;
+import ru.aston.user.service.exception.DatabaseOperationException;
 import ru.aston.user.service.exception.EmailCheckException;
-import ru.aston.user.service.exception.UserNotFoundException;
 import ru.aston.user.service.exception.ValidationException;
 
 import java.time.LocalDateTime;
@@ -55,7 +55,7 @@ public class UserService {
         Optional<User> existingUserOpt = userDao.findById(id);
         if (existingUserOpt.isEmpty()) {
             logger.warn("Пользователь с id={} не найден", id);
-            throw new UserNotFoundException("User not found with ID: " + id);
+            throw new DatabaseOperationException("User not found with ID: " + id);
         }
 
         User existingUser = existingUserOpt.get();
