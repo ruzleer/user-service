@@ -3,11 +3,13 @@ package ru.aston.user.service.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.aston.user.service.dao.UserDao;
+import ru.aston.user.service.dao.UserDaoImpl;
 import ru.aston.user.service.entity.User;
 import ru.aston.user.service.exception.DatabaseOperationException;
 import ru.aston.user.service.exception.EmailCheckException;
 import ru.aston.user.service.exception.ValidationException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +19,8 @@ public class UserService {
 
     private final UserDao userDao;
 
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    public UserService() {
+        this.userDao = new UserDaoImpl();
     }
 
     public User createUser(String name, String email, int age) {
@@ -31,8 +33,8 @@ public class UserService {
         logger.debug("Email {} свободен, создание пользователя разрешено", email);
         logger.debug("Создание объекта User");
         User user = new User();
-        user.setName(name.trim());;
-        user.setEmail(email.trim());
+        user.setName(name);
+        user.setEmail(email);
         user.setAge(age);
         logger.debug("Объект User создан: name={}, email={}, age={}", user.getName(), user.getEmail(), user.getAge());
         return userDao.save(user);
@@ -41,7 +43,7 @@ public class UserService {
     public void deleteUser(Long id) {
         logger.info("Запрос на удаление пользователя: id={}", id);
         if (id == null || id <= 0) {
-            logger.warn("Попытка неправильного ввода id");
+            logger.warn("Попытка не правильного ввода id");
             throw new ValidationException("Invalid user ID");
         }
         userDao.delete(id);
@@ -90,7 +92,7 @@ public class UserService {
             logger.warn("Попытка ввести пустую строку вместо имени");
             throw new ValidationException("Name cannot be empty");
         }
-        if (email == null || !email.trim().matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             logger.warn("Попытка ввести не правильный формат почты");
             throw new ValidationException("Invalid email format");
         }

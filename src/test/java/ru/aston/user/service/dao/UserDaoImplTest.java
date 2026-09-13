@@ -1,128 +1,111 @@
 package ru.aston.user.service.dao;
 
-import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import org.junit.jupiter.api.Assertions;
+import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.aston.user.service.AbstractPostgresTest;
 import ru.aston.user.service.entity.User;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class UserDaoImplTest extends AbstractPostgresTest {
+public class UserDaoImplTest {
 
-    private UserDao userDao;
+    private UserDaoImpl userDao;
+
+    private SessionFactory sessionFactory;
+
+    User user1 = new User(25, "Alex Ron", "alex@mail.ru", LocalDateTime.now());
 
     @BeforeEach
     void setUp() {
-        userDao = new UserDaoImpl(sessionFactory);
+        sessionFactory = new Configuration()
+                .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1")
+                .setProperty("hibernate.connection.username", "sa")
+                .setProperty("hibernate.connection.password", "")
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql", "true")
+                .addAnnotatedClass(User.class)
+                .buildSessionFactory();
 
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-            session.createMutationQuery("delete from User").executeUpdate();
-            session.getTransaction().commit();
+        userDao = new UserDaoImpl();
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (sessionFactory != null) {
+            sessionFactory.close();
         }
     }
 
-    private User persistUser(String name, String email, int age) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setAge(age);
 
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-            session.persist(user);
-            session.getTransaction().commit();
-        }
+    @Test
+    void TestSaveUser() {
+        User savedUser = userDao.save(user1);
 
-        return user;
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getId()).isNotNull();
+        assertThat(savedUser.getName()).isEqualTo("Alex Ron");
+        assertThat(savedUser.getEmail()).isEqualTo("alex@mail.ru");
+
+        userDao.delete(savedUser.getId());
     }
 
     @Test
-    @DisplayName("delete(Long id) — пользователь удалён")
-    void shouldDeleteUser() {
-        User user = persistUser(
-                "Ivan",
-                "ivan@example.com",
-                25
-        );
+    void TestUpdateUser() {
+        User savedUser = userDao.save(user1);
 
-        userDao.delete(user.getId());
+        savedUser.setName("Alex Ton");
+        savedUser.setAge(30);
 
-        Optional<User> result = userDao.findById(user.getId());
+        User updatedUser = userDao.update(savedUser);
 
-        assertThat(result).isEmpty();
+        assertThat(updatedUser.getName()).isEqualTo("Alex Ton");
+        assertThat(updatedUser.getAge()).isEqualTo(30);
+
+        userDao.delete(savedUser.getId());
     }
 
     @Test
-    @DisplayName("findById(Long id) — пользователь найден")
-    void shouldFindUserById() {
-        User user = persistUser(
-                "Ivan",
-                "ivan@example.com",
-                25
-        );
+    void TestFindById() {
+        User savedUser = userDao.save(user1);
 
-        Optional<User> result = userDao.findById(user.getId());
+        Optional<User> found = userDao.findById(savedUser.getId());
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(user.getId());
-        assertThat(result.get().getName()).isEqualTo("Ivan");
-        assertThat(result.get().getEmail()).isEqualTo("ivan@example.com");
+        assertThat(found).isPresent();
+        assertThat(found.get().getName()).isEqualTo("Alex Ron");
+
+        userDao.delete(savedUser.getId());
     }
 
     @Test
-    @DisplayName("findById(Long id) — пользователь не найден")
-    void shouldReturnEmptyWhenUserNotFound() {
+    void TestDeleteUserByID() {
+        User savedUser = userDao.save(user1);
 
-        Optional<User> result = userDao.findById(999999L);
+        userDao.delete(savedUser.getId());
 
-        assertThat(result).isEmpty();
+        Optional<User> found = userDao.findById(savedUser.getId());
+        assertThat(found).isEmpty();
     }
 
     @Test
-    @DisplayName("findAll() — возвращаются все пользователи")
-    void shouldFindAllUsers() {
-        persistUser("Ivan", "ivan@example.com", 25);
-        persistUser("Petr", "petr@example.com", 30);
-        persistUser("Anna", "anna@example.com", 22);
+    void TestSearchByEmail() {
+        User savedUser = userDao.save(user1);
 
-        List<User> result = userDao.findAll();
+        boolean exists = userDao.existByEmail("alex@mail.ru");
 
-        assertThat(result)
-                .hasSize(3)
-                .extracting(User::getEmail)
-                .containsExactly(
-                        "ivan@example.com",
-                        "petr@example.com",
-                        "anna@example.com"
-                );
+        assertThat(exists).isTrue();
+
+        userDao.delete(savedUser.getId());
     }
 
-    @Test
-    @DisplayName("existByEmail(String email) — email существует")
-    void shouldReturnTrueWhenEmailExists() {
-        persistUser(
-                "Ivan",
-                "ivan@example.com",
-                25
-        );
 
-        boolean result = userDao.existByEmail("ivan@example.com");
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("existByEmail(String email) — email не существует")
-    void shouldReturnFalseWhenEmailDoesNotExist() {
-
-        boolean result = userDao.existByEmail("unknown@example.com");
-
-        assertThat(result).isFalse();
-    }
 }

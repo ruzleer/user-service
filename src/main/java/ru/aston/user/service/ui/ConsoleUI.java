@@ -1,6 +1,5 @@
 package ru.aston.user.service.ui;
 
-import ru.aston.user.service.dao.UserDaoImpl;
 import ru.aston.user.service.entity.User;
 import ru.aston.user.service.service.UserService;
 
@@ -13,7 +12,7 @@ public class ConsoleUI {
     private final Scanner scanner;
 
     public ConsoleUI() {
-        this.userService = new UserService(new UserDaoImpl());
+        this.userService = new UserService();
         this.scanner = new Scanner(System.in);
     }
 
