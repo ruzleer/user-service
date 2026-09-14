@@ -1,6 +1,7 @@
 package ru.aston.user.service.dao;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -17,11 +18,23 @@ public class UserDaoImpl implements UserDao {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
 
+    private final SessionFactory sessionFactory;
+
+    public UserDaoImpl() {
+        this(HibernateUtil.getSessionFactory());
+    }
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public User save(User user) {
         Transaction transaction = null;
+        Session session = null;
         logger.debug("Получен пользователь: id = {}, name = {}", user.getId(), user.getName());
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try {
+            session = sessionFactory.openSession();
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             session.persist(user);
@@ -31,19 +44,25 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при сохранении информации о пользователе с id={}", user.getId());
-            throw new UserNotSaveException("Failed to save user");
+            throw new DatabaseOperationException("save", user.getId(), e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 
     @Override
     public User update(User user) {
         Transaction transaction = null;
+        Session session = null;
         logger.debug("Получен пользователь: id = {}, name = {}", user.getId(), user.getName());
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try {
             logger.debug("Сессия Hibernate открыта");
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
             User updatedUser = session.merge(user);
             transaction.commit();
@@ -52,10 +71,14 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при обновлении информации о пользователе с id={}", user.getId());
-            throw new UserNotUpdateException(user.getId());
+            throw new DatabaseOperationException("update", user.getId(), e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -63,7 +86,7 @@ public class UserDaoImpl implements UserDao {
     public void delete(Long id) {
         Transaction transaction = null;
         logger.debug("Получен id = {}", id);
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             transaction = session.beginTransaction();
             User user = session.get(User.class, id);
@@ -78,16 +101,16 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
-                logger.debug("Транзакция не запущена");
+                logger.debug("Выполнен откат транзакции");
             }
             logger.error("Ошибка при удалении пользователя с id={}", id);
-            throw new UserNotDeleteException(id);
+            throw new DatabaseOperationException("delete", id, e);
         }
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             User user = session.get(User.class, id);
             if (user != null) {
@@ -104,13 +127,13 @@ public class UserDaoImpl implements UserDao {
             }
         } catch (Exception e) {
             logger.info("Ошибка при поиске пользователя по id = {}", id);
-            throw new UserNotFoundException(id);
+            throw new DatabaseOperationException("find", id, e);
         }
     }
 
     @Override
     public List<User> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта");
             Query<User> query = session.createQuery("FROM User ORDER BY id", User.class);
             List<User> users = query.list();
@@ -134,13 +157,13 @@ public class UserDaoImpl implements UserDao {
             return users;
         } catch (Exception e) {
             logger.error("Ошибка при получении всех пользователей", e);
-            throw new UserNotFoundException("Failed to find users");
+            throw new DatabaseOperationException("Failed to find users");
         }
     }
 
     @Override
     public boolean existByEmail(String email) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             logger.debug("Сессия Hibernate открыта для проверки email: {}", email);
             Query<Long> query = session.createQuery(
                     "SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class);
