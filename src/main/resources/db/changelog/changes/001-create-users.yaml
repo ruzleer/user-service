@@ -4,6 +4,7 @@ databaseChangeLog:
       author: ruzleer
       changes:
         - createTable:
+            ifNotExists: true
             tableName: users
             columns:
               - column:
@@ -38,3 +39,7 @@ databaseChangeLog:
                   type: TIMESTAMP
                   constraints:
                     nullable: false
+            catalogName:
+            tablespace:
+            schemaName:
+            remarks:
