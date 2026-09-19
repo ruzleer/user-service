@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/user_service
-    username: postgres
-    password: 123
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: USER
+    password: PASSWORD
 
   jpa:
     hibernate:
@@ -12,6 +12,6 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-  logging:
-    level:
-      liquibase: DEBUG
+logging:
+  level:
+    liquibase: DEBUG
