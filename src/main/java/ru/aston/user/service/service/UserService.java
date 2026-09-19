@@ -2,35 +2,30 @@ package ru.aston.user.service.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.aston.user.service.dao.UserDao;
-import ru.aston.user.service.dao.UserDaoImpl;
+import org.springframework.stereotype.Service;
 import ru.aston.user.service.entity.User;
 import ru.aston.user.service.exception.DatabaseOperationException;
 import ru.aston.user.service.exception.EmailCheckException;
 import ru.aston.user.service.exception.ValidationException;
+import ru.aston.user.service.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private final UserDao userDao;
-
-    public UserService() {
-        this(new UserDaoImpl());
-    }
-
-    public UserService(UserDao userDao) {
-        this.userDao = userDao;
+    private final UserRepository userRepository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User createUser(String name, String email, int age) {
         logger.info("Запрос на создание нового пользователя: name={}, email={}, age={}", name, email, age);
         checkEnteredData(name, email, age);
-        if (userDao.existByEmail(email.trim())) {
+        if (userRepository.existsByEmail(email.trim())) {
             logger.warn("Попытка создания пользователя с уже существующим email: {}", email);
             throw new EmailCheckException("Email already exists: " + email.trim());
         }
@@ -41,21 +36,21 @@ public class UserService {
         user.setEmail(email.trim());
         user.setAge(age);
         logger.debug("Объект User создан: name={}, email={}, age={}", user.getName(), user.getEmail(), user.getAge());
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 
-    public void deleteUser(Long id) {
+    public void deleteByIdUser(Long id) {
         logger.info("Запрос на удаление пользователя: id={}", id);
         if (id == null || id <= 0) {
             logger.warn("Попытка не правильного ввода id");
             throw new ValidationException("Invalid user ID");
         }
-        userDao.delete(id);
+        userRepository.deleteById(id);
     }
 
-    public User updateUser(Long id, String name, String email, int age) {
+    public User saveUser(Long id, String name, String email, int age) {
         logger.info("Запрос на обновление пользователя: id={}", id);
-        Optional<User> existingUserOpt = userDao.findById(id);
+        Optional<User> existingUserOpt = userRepository.findById(id);
         if (existingUserOpt.isEmpty()) {
             logger.warn("Пользователь с id={} не найден", id);
             throw new DatabaseOperationException("User not found with ID: " + id);
@@ -64,7 +59,7 @@ public class UserService {
         User existingUser = existingUserOpt.get();
 
         checkEnteredData(name, email, age);
-        if (userDao.existByEmail(email.trim()) && !existingUser.getEmail().equals(email.trim())) {
+        if (userRepository.existsByEmail(email.trim()) && !existingUser.getEmail().equals(email.trim())) {
             logger.warn("Попытка обновление уже существующим email: {}", email);
             throw new EmailCheckException("Email already exists: " + email);
         }
@@ -73,7 +68,7 @@ public class UserService {
         existingUser.setEmail(email.trim());
         existingUser.setAge(age);
         logger.debug("Объект User обновлен: name={}, email={}, age={}", existingUser.getName(), existingUser.getEmail(), existingUser.getAge());
-        return userDao.update(existingUser);
+        return userRepository.save(existingUser);
     }
 
     public Optional<User> findById(Long id) {
@@ -82,12 +77,12 @@ public class UserService {
             logger.warn("Попытка не правильного ввода id");
             throw new ValidationException("Invalid user ID");
         }
-        return userDao.findById(id);
+        return userRepository.findById(id);
     }
 
     public List<User> getAllUsers() {
         logger.info("Запрос на поиск пользователей");
-        return userDao.findAll();
+        return userRepository.findAll();
     }
 
     private void checkEnteredData(String name, String email, int age) {

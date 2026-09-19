@@ -7,7 +7,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.aston.user.service.dao.UserDao;
 import ru.aston.user.service.entity.User;
 import ru.aston.user.service.exception.EmailCheckException;
 import ru.aston.user.service.exception.ValidationException;

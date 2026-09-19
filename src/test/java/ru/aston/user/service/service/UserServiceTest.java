@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import ru.aston.user.service.dao.UserDao;
 import ru.aston.user.service.entity.User;
 import ru.aston.user.service.exception.ValidationException;
+import ru.aston.user.service.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,14 +17,14 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     @Mock
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        userService = new UserService(userDao);
+        userService = new UserService(userRepository);
     }
 
     @Test
@@ -34,10 +34,10 @@ class UserServiceTest {
         savedUser.setEmail("ivan@mail.com");
         savedUser.setAge(25);
 
-        when(userDao.existByEmail("ivan@mail.com"))
+        when(userRepository.existsByEmail("ivan@mail.com"))
                 .thenReturn(false);
 
-        when(userDao.save(any(User.class)))
+        when(userRepository.save(any(User.class)))
                 .thenReturn(savedUser);
 
         User user = userService.createUser(
@@ -61,7 +61,7 @@ class UserServiceTest {
                 )
         );
 
-        verifyNoInteractions(userDao);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -75,7 +75,7 @@ class UserServiceTest {
                 )
         );
 
-        verifyNoInteractions(userDao);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -83,10 +83,10 @@ class UserServiceTest {
         User savedUser = new User();
         savedUser.setName("Ivan");
 
-        when(userDao.existByEmail("ivan@mail.com"))
+        when(userRepository.existsByEmail("ivan@mail.com"))
                 .thenReturn(false);
 
-        when(userDao.save(any(User.class)))
+        when(userRepository.save(any(User.class)))
                 .thenReturn(savedUser);
 
         User user = userService.createUser(
@@ -109,7 +109,7 @@ class UserServiceTest {
                 )
         );
 
-        verifyNoInteractions(userDao);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -117,10 +117,10 @@ class UserServiceTest {
         User savedUser = new User();
         savedUser.setEmail("ivan@mail.com");
 
-        when(userDao.existByEmail("ivan@mail.com"))
+        when(userRepository.existsByEmail("ivan@mail.com"))
                 .thenReturn(false);
 
-        when(userDao.save(any(User.class)))
+        when(userRepository.save(any(User.class)))
                 .thenReturn(savedUser);
 
         User user = userService.createUser(
@@ -143,7 +143,7 @@ class UserServiceTest {
                 )
         );
 
-        verifyNoInteractions(userDao);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -153,7 +153,7 @@ class UserServiceTest {
                 () -> userService.findById(-1L)
         );
 
-        verifyNoInteractions(userDao);
+        verifyNoInteractions(userRepository);
     }
 }
 
