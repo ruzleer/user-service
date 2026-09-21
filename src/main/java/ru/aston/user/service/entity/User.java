@@ -1,8 +1,7 @@
 package ru.aston.user.service.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,14 +18,22 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Min(value = 1)
+    @Max(value = 150)
     private int age;
 
     @NotBlank
+    @Pattern(
+            regexp = "^[^0-9]+$",
+            message = "Имя не должно содержать цифр"
+    )
     private String name;
 
     @Email
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
