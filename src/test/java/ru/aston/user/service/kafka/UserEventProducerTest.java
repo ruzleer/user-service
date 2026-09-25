@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,7 @@ class UserEventProducerTest {
     @BeforeEach
     void setUp() {
 
-        this.topic = "user-events-" + System.nanoTime();
+        this.topic = "user-events-" + UUID.randomUUID();
 
 
         Map<String, Object> producerProps = new HashMap<>();
@@ -52,7 +53,7 @@ class UserEventProducerTest {
 
         Map<String, Object> consumerProps = new HashMap<>();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "producer-test-group-" + System.nanoTime());
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "producer-test-group-" + UUID.randomUUID());
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
