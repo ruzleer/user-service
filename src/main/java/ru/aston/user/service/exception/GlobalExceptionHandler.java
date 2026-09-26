@@ -1,4 +1,4 @@
-package ru.aston.user.service.controller;
+package ru.aston.user.service.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.aston.user.service.dto.ErrorResponseDto;
-import ru.aston.user.service.exception.DatabaseOperationException;
-import ru.aston.user.service.exception.EmailAlreadyExistsException;
-import ru.aston.user.service.exception.UserNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/user
-    username: USER
-    password: PASSWORD
+    url: jdbc:postgresql://localhost:5432/user_service
+    username: postgres
+    password: 123
 
   jpa:
     hibernate:
@@ -11,6 +11,14 @@ spring:
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    topic:
+      user-events: "user-events"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   level:
