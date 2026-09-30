@@ -2,6 +2,7 @@ package ru.aston.user.service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
@@ -10,6 +11,7 @@ import ru.aston.user.service.dto.UserCreateDto;
 import ru.aston.user.service.dto.UserResponseDto;
 import ru.aston.user.service.dto.UserUpdateDto;
 import ru.aston.user.service.entity.User;
+import ru.aston.user.service.event.UserSpringEvent;
 import ru.aston.user.service.exception.*;
 import ru.aston.user.service.kafka.UserEvent;
 import ru.aston.user.service.kafka.UserEventProducer;
@@ -27,10 +29,10 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final UserEventProducer userEventProducer;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional
     public UserResponseDto create(UserCreateDto dto) {
         log.info("Creating user with email: {}", dto.getEmail());
 
@@ -42,8 +44,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
 
-        userEventProducer.send(
-                new UserEvent(UserOperation.CREATE, saved.getEmail())
+        eventPublisher.publishEvent(
+                new UserSpringEvent(this,
+                new UserEvent(UserOperation.CREATE, saved.getEmail()))
         );
 
         log.info("User created successfully with id: {}", saved.getId());
@@ -93,7 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional
     public void delete(Long id) {
         log.info("Deleting user with id: {}", id);
 
@@ -106,8 +109,9 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(id);
 
-        userEventProducer.send(
-                new UserEvent(UserOperation.DELETE, user.getEmail())
+        eventPublisher.publishEvent(
+                new UserSpringEvent(this,
+                new UserEvent(UserOperation.DELETE, user.getEmail()))
         );
 
         log.info("User deleted successfully with id: {}", id);
