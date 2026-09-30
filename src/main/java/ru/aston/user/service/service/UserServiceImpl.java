@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import ru.aston.user.service.dto.UserCreateDto;
 import ru.aston.user.service.dto.UserResponseDto;
 import ru.aston.user.service.dto.UserUpdateDto;
@@ -28,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserEventProducer userEventProducer;
 
     @Override
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public UserResponseDto create(UserCreateDto dto) {
         log.info("Creating user with email: {}", dto.getEmail());
 
@@ -91,7 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void delete(Long id) {
         log.info("Deleting user with id: {}", id);
 
