@@ -14,7 +14,10 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.testcontainers.utility.TestEnvironment;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -24,23 +27,21 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@EmbeddedKafka
 class UserEventProducerTest {
-
-    private static final String BOOTSTRAP_SERVERS = "localhost:9092";
-
 
     private String topic;
     private Consumer<String, UserEvent> consumer;
     private UserEventProducer producer;
 
     @BeforeEach
-    void setUp() {
+    void setUp(EmbeddedKafkaBroker embeddedKafkaBroker) {
 
         this.topic = "user-events-" + UUID.randomUUID();
 
 
         Map<String, Object> producerProps = new HashMap<>();
-        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaBroker.getBrokersAsString());
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
@@ -52,7 +53,7 @@ class UserEventProducerTest {
         this.producer = new UserEventProducer(kafkaTemplate, topic);
 
         Map<String, Object> consumerProps = new HashMap<>();
-        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaBroker.getBrokersAsString());
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "producer-test-group-" + UUID.randomUUID());
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
