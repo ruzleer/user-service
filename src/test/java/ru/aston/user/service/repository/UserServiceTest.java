@@ -8,12 +8,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import ru.aston.user.service.dto.UserCreateDto;
 import ru.aston.user.service.dto.UserResponseDto;
 import ru.aston.user.service.dto.UserUpdateDto;
 import ru.aston.user.service.entity.User;
+import ru.aston.user.service.event.UserSpringEvent;
 import ru.aston.user.service.exception.EmailAlreadyExistsException;
 import ru.aston.user.service.exception.UserNotFoundException;
+import ru.aston.user.service.kafka.UserEventProducer;
 import ru.aston.user.service.mapper.UserMapper;
 import ru.aston.user.service.service.UserServiceImpl;
 
@@ -35,6 +38,11 @@ public class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
+    @Mock private UserEventProducer userEventProducer;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -274,10 +282,14 @@ public class UserServiceTest {
         void shouldDeleteUser() {
 
             when(userRepository.existsById(1L)).thenReturn(true);
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
             userService.delete(1L);
 
+            verify(userRepository).existsById(1L);
+            verify(userRepository).findById(1L);
             verify(userRepository).deleteById(1L);
+            verify(eventPublisher).publishEvent(any(UserSpringEvent.class));
         }
 
         @Test
