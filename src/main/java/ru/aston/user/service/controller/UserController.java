@@ -3,6 +3,7 @@ package ru.aston.user.service.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("api/users")
 public class UserController {
 
     private final UserService service;
@@ -60,7 +62,7 @@ public class UserController {
     @Operation
             (summary = "Получить всех пользователей",
              description = "Метод возвращает всех существующих в БД пользователей")
-    @GetMapping("/users")
+    @GetMapping()
     public ResponseEntity<List<UserResponseDto>> getAllUsersById() {
         List<UserResponseDto> users = service.getAll();
 
